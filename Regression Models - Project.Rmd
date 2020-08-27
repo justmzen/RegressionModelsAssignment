@@ -8,90 +8,86 @@ output: pdf_document
 # Executive summary
 
 The aim of the following study is to evaluate the relationship among many variables and miles per gallon (mpg) as the outcome. The main questions are:
-- Is an automatic or manual ammission better for mtcars?
-- Quantify the mtcars difference between automatic and manual ammissions.
+- Is an automatic or manual transmission better for mtcars?
+- Quantify the mtcars difference between automatic and manual transmissions.
 
-# Data loading
+# Data loading and manipulation
 
 ```{r, echo = TRUE, message = FALSE}
-library('datasets'); data(mtcars)
+library('ggplot2')
+library('datasets'); data('mtcars')
+mtcars$am <- as.factor(mtcars$am)
+levels(mtcars$am) <- c('Automatic', 'Manual')
 ```
 
 # Exploratory data analysis
 
-The scope of the exploratory data analysis is to find any interesting relationship among the outcome and the possible regressors, including the ammission type. The detailed analysis is in the Appendix.
+For details on the data set see Appendix A.  
+For graphs on interesting variables see Appendix B.  
 
-# Appendix
+The data set has 32 observations and 11 variables. The relevant variables are mpg (outcome) and am (asked regressor). The plot in Appendix B shows that there is a possible relationship between the two variables: the manual transmission has a higher mpg compared to the automatic one.  
 
-## Exploratory data analysis
+A t-test ...
 
-```{r, echo = TRUE}
+# Appendixes
 
-```
-
-```{r, echo = TRUE}
-
-```
+## Appendix A
 
 ```{r, echo = TRUE}
-
+str(mtcars)
+head(mtcars)
 ```
 
-```{r, echo = TRUE}
+## Appendix B
 
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-
-
-
-
-
-
-
-
-
-## Transmission
+### Transmission
 
 ```{r, echo = TRUE, fig.width=5, fig.height=3, fig.align='center'}
-qplot(factor(am), mpg, data=mtcars, geom='boxplot', fill=factor(am))
+qplot(am, mpg, data=mtcars, geom='boxplot', fill=am)
 ```
 
-There are many subcategories for the am variable. For this reason, a new categorical variable called "Transmission" will be included in the data set with two levels, automatic and manual:
 
 ```{r, echo = TRUE}
-mtcars$ammission <- as.factor(ifelse(grepl(pattern = '^auto',
-                                           x = mtcars$am) == TRUE,
-                                     'automatic',
-                                     'manual'))
+
 ```
 
-## Mileage in city
+```{r, echo = TRUE}
 
-```{r, echo = TRUE, fig.width=4, fig.height=3, fig.align='center'}
-summary(mtcars$cty)
-qplot(cty, data=mtcars, geom="histogram", bins=25)
 ```
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
+
+
+
+
+
+
+
+
+
 
 # Comparing automatic and manual ammissions
 
 ```{r, echo = TRUE, fig.width=4, fig.height=3, fig.align='center'}
-qplot(ammission, cty, data=mtcars, geom="boxplot", fill=ammission, ylab = 'City miles per gallon')
+# qplot(ammission, cty, data=mtcars, geom="boxplot", fill=ammission, ylab = 'City miles per gallon')
 ```
 
 The plot suggests that manual ammission is better than automatic ammission based on the cty variable.
@@ -99,9 +95,9 @@ The plot suggests that manual ammission is better than automatic ammission based
 A t-test can verify the mean of manual ammission is greater than the mean of automatic ammission.
 
 ```{r, echo = TRUE}
-t.test(mtcars[ammission == 'manual','cty'],
-       mtcars[ammission == 'automatic','cty'],
-       alternative = "greater", var.equal = FALSE)$p.value
+# t.test(mtcars[ammission == 'manual','cty'],
+       # mtcars[ammission == 'automatic','cty'],
+       # alternative = "greater", var.equal = FALSE)$p.value
 ```
 
 Since the p-value is very low, it is possible to reject the null hypothesis that the means are equal and accept the alternative hypothesis, which is that the mean of the manual ammission is greater than the automatic one.
@@ -109,25 +105,25 @@ Since the p-value is very low, it is possible to reject the null hypothesis that
 # Models
 
 ```{r, echo = TRUE}
-fit1 <- lm(cty ~ ammission, data = mtcars)
-summary(fit1)
-
-fit2 <- update(fit1, cty ~ ammission + class -1)
-summary(fit2)
-
-fit3 <- update(fit1, cty ~ ammission + class + fl)
-summary(fit3)
-
-fit4 <- update(fit1, cty ~ ammission + class + fl + displ)
-fit5 <- update(fit1, cty ~ ammission + class + fl + displ + drv)
-fitAll <- update(fit1, cty ~ ammission + class + fl + displ + drv +
-                         manufacturer + model + year)
+# fit1 <- lm(cty ~ ammission, data = mtcars)
+# summary(fit1)
+# 
+# fit2 <- update(fit1, cty ~ ammission + class -1)
+# summary(fit2)
+# 
+# fit3 <- update(fit1, cty ~ ammission + class + fl)
+# summary(fit3)
+# 
+# fit4 <- update(fit1, cty ~ ammission + class + fl + displ)
+# fit5 <- update(fit1, cty ~ ammission + class + fl + displ + drv)
+# fitAll <- update(fit1, cty ~ ammission + class + fl + displ + drv +
+#                          manufacturer + model + year)
 ```
 
 # Model selection
 
 ```{r, echo = TRUE, message = FALSE}
-anova(fit1, fit2, fit3, fit4, fit5, fitAll)
+# anova(fit1, fit2, fit3, fit4, fit5, fitAll)
 
 require(car)
 
