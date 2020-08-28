@@ -1,7 +1,7 @@
 ---
 title: "Regression Models - Project"
 author: "justmzen"
-date: "8/21/2020"
+date: "8/28/2020"
 output: pdf_document
 ---
 
@@ -27,7 +27,58 @@ For graphs on interesting variables see Appendix B.
 
 The data set has 32 observations and 11 variables. The relevant variables are mpg (outcome) and am (asked regressor). The plot in Appendix B shows that there is a possible relationship between the two variables: the manual transmission has a higher mpg compared to the automatic one.  
 
-A t-test ...
+A t-test could be performed to evaluate the difference of the mean value of the two groups. The formula option in the r function "t-test" will divide the data set into the two groups.
+
+```{r, echo = TRUE}
+tTest1 <- t.test(formula = mpg ~ am, data = mtcars)
+tTest1$p.value
+```
+
+The null hypothesis is that the two groups are similar. Since the p-value is less than 0.05, it is unlikely that the two groups differ just by chance. Hence the null hypothesis is rejected and the alternative hypothesis accepted (transmission influences mpg).
+
+# Model selection
+
+## Linear model based on transmission
+
+The t-test proved that there is a relationship between mpg and am. The first attempt will be modeling mpg only with am.
+
+```{r, echo = TRUE}
+lm1 <- lm(mpg ~ am, data = mtcars)
+summary(lm1)
+```
+The p-value for this linear model is low, hence the coefficient is significant (significantly different from 0).  
+
+However the adjusted R-squared is low. This means that the variation explained by the model is poor. For this reason, other models should be evaluated.
+
+## Linear model based on all the variables
+
+```{r, echo = TRUE}
+lmAll <- lm(mpg ~ ., data = mtcars)
+summary(lmAll)
+
+# Variance inflation factors
+require('car'); vif(lmAll)
+```
+The variation inflation factors indicate the proportional increase in the variance for each coefficient respect to the case in which the i-th variable is completely independent from the others. The higher the VIF, the higher the redundancy with other variables. VIFs are large for: cyl, disp, wt.
+
+```{r, echo = TRUE}
+lm3 <- lm(mpg ~ am + hp + drat + qsec + vs + gear + carb, data = mtcars)
+summary(lm3)
+```
+
+The variables am, hp, drat, qsec, vs, gear and carb fit a poor model.
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
+
+```{r, echo = TRUE}
+
+```
 
 # Appendixes
 
@@ -44,111 +95,4 @@ head(mtcars)
 
 ```{r, echo = TRUE, fig.width=5, fig.height=3, fig.align='center'}
 qplot(am, mpg, data=mtcars, geom='boxplot', fill=am)
-```
-
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-
-
-
-
-
-
-
-
-
-# Comparing automatic and manual ammissions
-
-```{r, echo = TRUE, fig.width=4, fig.height=3, fig.align='center'}
-# qplot(ammission, cty, data=mtcars, geom="boxplot", fill=ammission, ylab = 'City miles per gallon')
-```
-
-The plot suggests that manual ammission is better than automatic ammission based on the cty variable.
-
-A t-test can verify the mean of manual ammission is greater than the mean of automatic ammission.
-
-```{r, echo = TRUE}
-# t.test(mtcars[ammission == 'manual','cty'],
-       # mtcars[ammission == 'automatic','cty'],
-       # alternative = "greater", var.equal = FALSE)$p.value
-```
-
-Since the p-value is very low, it is possible to reject the null hypothesis that the means are equal and accept the alternative hypothesis, which is that the mean of the manual ammission is greater than the automatic one.
-
-# Models
-
-```{r, echo = TRUE}
-# fit1 <- lm(cty ~ ammission, data = mtcars)
-# summary(fit1)
-# 
-# fit2 <- update(fit1, cty ~ ammission + class -1)
-# summary(fit2)
-# 
-# fit3 <- update(fit1, cty ~ ammission + class + fl)
-# summary(fit3)
-# 
-# fit4 <- update(fit1, cty ~ ammission + class + fl + displ)
-# fit5 <- update(fit1, cty ~ ammission + class + fl + displ + drv)
-# fitAll <- update(fit1, cty ~ ammission + class + fl + displ + drv +
-#                          manufacturer + model + year)
-```
-
-# Model selection
-
-```{r, echo = TRUE, message = FALSE}
-# anova(fit1, fit2, fit3, fit4, fit5, fitAll)
-
-require(car)
-
-```
-
-# Interpretation of the coefficients
-
-```{r, echo = TRUE}
-
-```
-
-# Diagnostics
-Diagnostics and/or residual plots
-
-```{r, echo = TRUE}
-# e <- resid(fit)
-# plot(fit)
-```
-
-# Conclusion
-Inference / uncertainty quantification
-
-```{r, echo = TRUE}
-# Confidence intervals
-# sumCoef <- summary(fit)$coefficients
-# sumCoef[1,1] + c(-1,1)*qt(.975, df=fit$df)*sumCoef[1,2]
-# sumCoef[2,1] + c(-1,1)*qt(.975, df=fit$df)*sumCoef[2,2]
 ```
