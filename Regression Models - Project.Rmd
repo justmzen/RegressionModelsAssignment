@@ -1,40 +1,33 @@
 ---
-title: "Regression Models - Project"
+title: "Regression model for Miles/(US) gallon in mtcars"
 author: "justmzen"
-date: "8/28/2020"
 output: pdf_document
 ---
 
 # Executive summary
 
-The aim of the following study is to evaluate the relationship among many variables and miles per gallon (mpg) as the outcome. The main questions are:
-- Is an automatic or manual transmission better for mtcars?
-- Quantify the mtcars difference between automatic and manual transmissions.
+The aim of the following study is to evaluate the relationship among the outcome mpg (Miles/(US) gallon) and the other variables of the 'mtcars' data set. The main questions: is an automatic or manual transmission better for mtcars? It is also asked to quantify the mtcars difference between automatic and manual transmissions.
 
 # Data loading and manipulation
 
 ```{r, echo = TRUE, message = FALSE}
-library('ggplot2')
-library('datasets'); data('mtcars')
-mtcars$am <- as.factor(mtcars$am)
-levels(mtcars$am) <- c('Automatic', 'Manual')
+library('ggplot2', 'datasets'); data('mtcars')
+mtcars$am <- as.factor(mtcars$am); levels(mtcars$am) <- c('Automatic', 'Manual')
 ```
 
 # Exploratory data analysis
 
-For details on the data set see Appendix A.  
-For graphs on interesting variables see Appendix B.  
+For details on the data set see Appendix A. For graphs on interesting variables see Appendix B.  
 
 The data set has 32 observations and 11 variables. The relevant variables are mpg (outcome) and am (asked regressor). The plot in Appendix B shows that there is a possible relationship between the two variables: the manual transmission has a higher mpg compared to the automatic one.  
 
 A t-test could be performed to evaluate the difference of the mean value of the two groups. The formula option in the r function "t-test" will divide the data set into the two groups.
 
 ```{r, echo = TRUE}
-tTest1 <- t.test(formula = mpg ~ am, data = mtcars)
-tTest1$p.value
+tTest1 <- t.test(formula = mpg ~ am, data = mtcars); tTest1$p.value
 ```
 
-The null hypothesis is that the two groups are similar. Since the p-value is less than 0.05, it is unlikely that the two groups differ just by chance. Hence the null hypothesis is rejected and the alternative hypothesis accepted (transmission influences mpg).
+The null hypothesis is that the two groups are similar. Since the p-value is less than 0.05, it is unlikely that the two groups differ just by chance. Hence the null hypothesis is rejected and the alternative hypothesis is accepted (transmission influences mpg).
 
 # Model selection
 
@@ -44,55 +37,82 @@ The t-test proved that there is a relationship between mpg and am. The first att
 
 ```{r, echo = TRUE}
 lm1 <- lm(mpg ~ am, data = mtcars)
-summary(lm1)
 ```
-The p-value for this linear model is low, hence the coefficient is significant (significantly different from 0).  
-
-However the adjusted R-squared is low. This means that the variation explained by the model is poor. For this reason, other models should be evaluated.
+The p-value for this linear model is low, hence the coefficient is significant (significantly different from 0) (see reference in Appendix C). However the adjusted R-squared is low. This means that the variation explained by the model is poor. For this reason, other models should be evaluated.
 
 ## Linear model based on all the variables
 
-```{r, echo = TRUE}
+```{r, echo = TRUE, message = FALSE}
 lmAll <- lm(mpg ~ ., data = mtcars)
-summary(lmAll)
-
-# Variance inflation factors
-require('car'); vif(lmAll)
-```
-The variation inflation factors indicate the proportional increase in the variance for each coefficient respect to the case in which the i-th variable is completely independent from the others. The higher the VIF, the higher the redundancy with other variables. VIFs are large for: cyl, disp, wt.
-
-```{r, echo = TRUE}
-lm3 <- lm(mpg ~ am + hp + drat + qsec + vs + gear + carb, data = mtcars)
-summary(lm3)
+require('car'); vif(lmAll) # Variance inflation factors
 ```
 
-The variables am, hp, drat, qsec, vs, gear and carb fit a poor model.
+The p-values for this model are not significant. Furthermore, the variation inflation factors, which indicate the proportional increase in the variance for the i-th coefficient respect to the case in which the i-th variable is completely independent from the others, are high for many variables. The higher the VIF, the higher the collinearity with the other variables.
+
+## Accepted linear model
 
 ```{r, echo = TRUE}
-
+lm3 <- lm(mpg ~ am + wt + qsec, data = mtcars)
 ```
 
+The linear model based on transmission, weight and 1/4 mile time has p-values under 0.05 and adjusted R-squaded around 0.83. The usage of other regressors do not increase R-squared significantly but gets worse p-values.  
+
+The coefficient for transmission claims that manual transmission delivers around 2.94 more mpg than the automatic one.
+
+## Diagnostics
+
+Diagnostics plots are shown in Appendix D. Some aspects:
+
+- Residual VS fitted values plot shows there is not any particular pattern, so the dependency among mpg and the other values seems to be only linear.  
+
+- The normal Q-Q plot shows that the points almost follow the line, hence the standardized residuals are normally distributed.  
+
+- The Residual VS Leverage plot shows there are no relevant leverage points.  
+
+## Conclusion
+
+The answers to the initial questions are:
+- manual transmission is better for mtcars
+- manual transmission delivers around 2.94 more mpg than the automatic transmission. The model which provides this result has p-values under 0.05 and adjusted R-squared equal to 0.83.
+
+
+
+\newpage
+## Appendix A - mtcars data set
+
 ```{r, echo = TRUE}
-
-```
-
-```{r, echo = TRUE}
-
-```
-
-# Appendixes
-
-## Appendix A
-
-```{r, echo = TRUE}
+knitr::kable(head(mtcars))
 str(mtcars)
-head(mtcars)
 ```
 
-## Appendix B
-
-### Transmission
+## Appendix B - Exploratory data analysis
 
 ```{r, echo = TRUE, fig.width=5, fig.height=3, fig.align='center'}
 qplot(am, mpg, data=mtcars, geom='boxplot', fill=am)
+```
+
+# Appendix C - Summaries for different models
+
+## Linear model based on transmission
+
+```{r, echo = TRUE}
+summary(lm1)
+```
+
+## Linear model based all the other variables
+
+```{r, echo = TRUE}
+summary(lmAll)
+```
+
+## Linear model based on transmission, weight and 1/4 mile time
+
+```{r, echo = TRUE}
+summary(lm3)
+```
+
+# Appendix D - Diagnostics plots
+
+```{r, echo = TRUE}
+par(mfrow=c(2,2)); plot(lm3)
 ```
